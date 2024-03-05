@@ -19,7 +19,7 @@ function Income() {
   const [incomeItem, setIncomeItem] = useState(income);
   const totalAmount = useMemo(() => {
     return incomeArray.reduce((total, current) => {
-      return total + parseInt(current.incomeAmount.toString())
+      return total + parseInt(current.incomeAmount.toString());
     }, 0);
   }, [incomeArray]);
 
@@ -54,7 +54,15 @@ function Income() {
     }
   };
 
-  const handleDelete = (incomeId: string | undefined) => {};
+  const handleDelete = (incomeId: string) => {
+    const findItem = incomeArray.find((id) => id.id === incomeId);
+    const text = `[${findItem?.incomeSource}: ${findItem?.incomeAmount} RS On ${format(new Date(findItem?.incomeDate), "eee - d MMM yyyy")}]`;
+    const confirmValue = confirm(`Are Yuu Sure To Delete ? \n${text}`);
+    if (confirmValue) {
+      const deleteIncome = incomeArray.filter((id) => id.id !== incomeId);
+      setIncomeArray(deleteIncome);
+    }
+  };
 
   return (
     <>
@@ -107,13 +115,13 @@ function Income() {
               <ul key={income.id}>
                 <li key={income.id}>
                   {income.incomeSource}: {income.incomeAmount} RS On
-                  {format(new Date(income.incomeDate), "eee - d MMM yyyy")}
-                  <span onClick={() => handleDelete(income.id)}>
+                  {format(new Date(income.incomeDate), " eee - d MMM yyyy")}
+                  <button onClick={() => handleDelete(income.id)}>
                     <FontAwesomeIcon icon={faTrash} />
-                  </span>
-                  <span>
+                  </button>
+                  <button>
                     <FontAwesomeIcon icon={faEdit} />
-                  </span>
+                  </button>
                 </li>
               </ul>
             );
