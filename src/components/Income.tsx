@@ -6,16 +6,16 @@ import { format } from "date-fns";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 
-import { typeIncome } from "./Types";
+import { TypeIncome } from "./Types";
 
-const income: typeIncome = {
-  id: "",
+const income: TypeIncome = {
+  id: '',
   incomeSource: "",
   incomeAmount: 0,
   incomeDate: "",
 };
 function Income() {
-  const [incomeArray, setIncomeArray] = useState<typeIncome[]>([]);
+  const [incomeArray, setIncomeArray] = useState<TypeIncome[]>([]);
   const [incomeItem, setIncomeItem] = useState(income);
   const totalAmount = useMemo(() => {
     return incomeArray.reduce((total, current) => {
@@ -27,7 +27,7 @@ function Income() {
     const { value, name } = event.target;
     setIncomeItem((prevIncome) => ({
       ...prevIncome,
-      [name]: value,
+      [name]: value.trim(),
     }));
   };
 
@@ -56,7 +56,8 @@ function Income() {
 
   const handleDelete = (incomeId: string) => {
     const findItem = incomeArray.find((id) => id.id === incomeId);
-    const text = `[${findItem?.incomeSource}: ${findItem?.incomeAmount} RS On ${format(new Date(findItem?.incomeDate), "eee - d MMM yyyy")}]`;
+    const formatDate= format(new Date(findItem?.incomeDate), "eee - d MMM yyyy")
+    const text = `[${findItem?.incomeSource}: ${findItem?.incomeAmount} RS On ${formatDate}}]`;
     const confirmValue = confirm(`Are Yuu Sure To Delete ? \n${text}`);
     if (confirmValue) {
       const deleteIncome = incomeArray.filter((id) => id.id !== incomeId);
@@ -105,16 +106,16 @@ function Income() {
           <button type="submit">Add Income</button>
         </form>
       </div>
-      <div>
-        {incomeArray.length > 0 ? <p>Total Of Amount: {totalAmount} RS</p> : ""}
+      <div className="info-income">
+        {incomeArray.length > 0 ? <p>Total Of Amount: <span>{totalAmount}</span>  RS <br /> {incomeArray.length>1 ?`Incomes Source: <span>${incomeArray.length}</span>` :``} </p> : ""}
       </div>
-      <div>
+      <div className="list-income">
         {incomeArray.length > 0 ? (
           incomeArray.map((income) => {
             return (
               <ul key={income.id}>
                 <li key={income.id}>
-                  {income.incomeSource}: {income.incomeAmount} RS On
+                  {income.incomeSource.charAt(0).toUpperCase() + income.incomeSource.slice(1)}: {income.incomeAmount} RS On
                   {format(new Date(income.incomeDate), " eee - d MMM yyyy")}
                   <button onClick={() => handleDelete(income.id)}>
                     <FontAwesomeIcon icon={faTrash} />
