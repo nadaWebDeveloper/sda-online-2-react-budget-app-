@@ -1,13 +1,7 @@
-export type typeIncome = {
-    id?:string;
-    incomeSource: string;
-    incomeAmount:number;
-    incomeDate: string;
+export type TypeForm = {
+    Id:string;
+   Source: string;
+   Amount:number;
+    Date: string;
 }
 
-export type typeExpense ={
-    d?:string;
-    expenseSource: string;
-    expenseAmount: number;
-    expenseDate: string;
-}
