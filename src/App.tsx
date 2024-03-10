@@ -7,6 +7,11 @@ import Form from "./components/Form";
 function App() {
   let [totalIncome, setTotalIncome] = useState(0);
   let [totalExpenses, setTotalExpenses] = useState(0);
+  let [totalSaving, setTotalSaving] = useState(0);
+
+  let getTotalSavingUpdated = (finalSaving: number) => {
+    setTotalSaving(finalSaving);
+  };
 
   let totalIncomeUpdated = (finalIncome: number) => {
     setTotalIncome(finalIncome);
@@ -20,8 +25,8 @@ function App() {
     <>
       <Form totalIncomeUpdated={totalIncomeUpdated} totalExpensesUpdated={totalExpensesUpdated} typeForm={"Incomes"} />
       <Form totalExpensesUpdated={totalExpensesUpdated} totalIncomeUpdated={totalIncomeUpdated} typeForm={"Expenses"} />
-      <SavingAmount totalIncome={totalIncome} totalExpenses={totalExpenses}/>
-      <SavingTarget totalSaving={68} />
+      <SavingAmount totalIncome={totalIncome} totalExpenses={totalExpenses} totalSaving={totalSaving} getTotalSavingUpdated={getTotalSavingUpdated}/>
+      <SavingTarget totalSaving={totalSaving} />
     </>
   );
 }
