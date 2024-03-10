@@ -1,22 +1,25 @@
-import React from 'react'
+import React from "react";
 
-function SavingAmount() {
+function SavingAmount(props: { totalIncome: number; totalExpenses: number }) {
+  let balance = props.totalExpenses - props.totalIncome;
+  let positiveBalance = Math.abs(balance);
+
   return (
     <>
-       <div>
+      <div>
         <form action="">
-            <div>
-                <h3>Current Balance: {6789}</h3>
-            </div>
-            <div>
-                <label htmlFor="transfer">Transfer To Saving Amount:</label>
-                <input type="number" name="transfer" id="transfer" />
-                <button type="submit">Transfer</button>
-            </div>
+          <div>
+            <h3>Current Balance: {positiveBalance}</h3>
+          </div>
+          <div>
+            <label htmlFor="transfer">Transfer To Saving Amount:</label>
+            <input type="number" name="transfer" id="transfer" />
+            <button type="submit">Transfer</button>
+          </div>
         </form>
-        </div> 
+      </div>
     </>
-  )
+  );
 }
 
-export default SavingAmount
+export default SavingAmount;
