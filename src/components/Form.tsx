@@ -1,4 +1,5 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
 
 import { v4 as uuidv4 } from "uuid";
 import { format } from "date-fns";
@@ -6,139 +7,146 @@ import { format } from "date-fns";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 
-import { TypeForm } from "./Types";
+import { toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
+import TitlePage from "./TitlePage";
 
-const attributeForm: TypeForm = {
-  Id: '',
-  Source: '',
-  Amount: 0,
-  Date: ''
+
+type Inputs = {
+  id: string;
+  Source: string;
+  Amount: number;
+  Date: string;
 };
-function Form(props:{totalIncomeUpdated: (finalIncome: number) => void,totalExpensesUpdated:(finalExpense: number) => void, typeForm:string}) {
-  const [formArray, setFormArray] = useState<TypeForm[]>([]);
-  const [formItem, setFormItem] = useState(attributeForm);
-  const [error, setError] = useState('');
+type formProps = {
+  totalIncomeUpdated: (finalIncome: number) => void;
+  totalExpensesUpdated: (finalExpense: number) => void;
+  typeForm: string;
+};
+
+function Form(props: formProps) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>({
+    defaultValues: {
+      Source: "",
+      Amount: 0,
+      Date: "",
+    },
+  });
+
+  let [formData, setFormData] = useState<Inputs[]>([]);
 
   const totalAmount = useMemo(() => {
-    return formArray.reduce((total, current) => {
+    return formData.reduce((total, current) => {
       return total + parseInt(current.Amount.toString());
     }, 0);
-  }, [formArray]);
+  }, [formData]);
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = event.target;
-    setFormItem((prevIncome) => ({
-      ...prevIncome,
-      [name]: value.trim(),
-    }));
+  const handleSubmitForm: SubmitHandler<Inputs> = (data) => {
+    const newData = { ...data, id: uuidv4() };
+    formData = [newData, ...formData];
+    setFormData((prevItem) => [...prevItem, newData]);
+      setValue("Source", "");
+      setValue("Amount", 0);
+      setValue("Date", "");
+     toast.success(`Added New ${props.typeForm}`);
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (
-      formItem.Amount &&
-      formItem.Source &&
-      formItem.Date
-    ) {
-      if (formItem.Amount > 0) {
-        const newIn = { ...formItem , id: uuidv4()}
-        setFormArray((prevItem) => [...prevItem,newIn]);
-        setFormItem(attributeForm);
-        alert(`Added New ${props.typeForm}`);
-      } else {
-        alert("Enter Positive Number");
-      }
+  useEffect(() => {
+    if (props.typeForm === `Incomes`) {
+      props.totalIncomeUpdated(totalAmount);
+    } else {
+      props.totalExpensesUpdated(totalAmount);
     }
-  };
-
-  useEffect(()=> {
-    if(props.typeForm === `Incomes`){
-      props.totalIncomeUpdated(totalAmount)
-    }else{
-      props.totalExpensesUpdated(totalAmount)
-    }
-  },[totalAmount,formArray, props ])
-
- const handleFocus = () => {
-    if(formItem.Source.length < 2){
-      setError(' * Minimum Length Must be 3')
-    }
- }
- const handleBlur = () => {
-
-    setError('')
- 
- }
+  }, [totalAmount, formData, props]);
 
   const handleDelete = (incomeId: string) => {
-    const findItem = formArray.find((id) => id.Id === incomeId);
-    const formatDate= format(new Date(findItem?.Date), "eee - d MMM yyyy")
-    const text = `[${findItem?.Source}: ${findItem?.Amount} RS On ${formatDate}}]`;
+    const findItem = formData.find((id) => id.id === incomeId);
+    const formatDate = format(new Date(findItem?.Date), "eee - d MMM yyyy");
+    const text = `[${findItem?.Source}: ${findItem?.Amount} RS On ${formatDate}]`;
     const confirmValue = confirm(`Are Yuu Sure To Delete ? \n${text}`);
     if (confirmValue) {
-      const deleteIncome = formArray.filter((id) => id.Id !== incomeId);
-      setFormArray(deleteIncome);
+      const deleteIncome = formData.filter((id) => id.id !== incomeId);
+      setFormData(deleteIncome);
     }
   };
 
   return (
     <>
       <div>
-        <form onSubmit={handleSubmit}>
+        <TitlePage titlePage={props.typeForm} />
+        <form onSubmit={handleSubmit(handleSubmitForm)}>
           <div>
-            <label htmlFor="incomeSource">{props.typeForm} Source:</label>
+            <label htmlFor="Source">{props.typeForm} Source: </label>
             <input
               type="text"
-              value={formItem.Source}
-              name="incomeSource"
-              id="incomeSource"
+              id="Source"
               placeholder="Salary"
-              onChange={handleChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              required
+              {...register("Source", {
+                required: " * Field Is Required ",
+                minLength: {
+                  value: 3,
+                  message: " * The Minimum Length Must Be 3 Characters",
+                },
+              })}
             />
-            {error}
+            {errors.Source && <span>{errors.Source.message}</span>}
           </div>
           <div>
-            <label htmlFor="incomeAmount">Amount {props.typeForm}</label>
+            <label htmlFor="Amount">Amount {props.typeForm}: </label>
             <input
               type="number"
-              name="incomeAmount"
-              id="incomeAmount"
-              value={formItem.Amount}
-              onChange={handleChange}
-              onFocus={handleFocus}
-              onBlur={handleBlur}
-              required
+              id="Amount"
+              {...register("Amount", {
+                required: " *  Amount Field Is Required ",
+                min: { value: 1, message: " * The Minimum Amount Must Be 1 " },
+              })}
             />
+            {errors.Amount && <span>{errors.Amount.message}</span>}
           </div>
           <div>
-            <label htmlFor="incomeDate">Date {props.typeForm}:</label>
+            <label htmlFor="Date">Date {props.typeForm}: </label>
             <input
               type="date"
-              name="incomeDate"
-              id="incomeDate"
-              value={formItem.Date}
-              onChange={handleChange}
-              required
+              id="Date"
+              {...register("Date", {
+                required: " * Date Field Is Required ",
+              })}
             />
+            {errors.Date && <span>{errors.Date.message}</span>}
           </div>
-          <button type="submit">Add {props.typeForm}</button>
+          <button type="submit">
+            Add {props.typeForm}
+          </button>
         </form>
       </div>
       <div className="info-income">
-        {formArray.length > 0 ? <p>Total Of Amount: <span>{totalAmount}</span>  RS <br /> {formArray.length>1 ?`${props.typeForm} Source: ${formArray.length}` :``} </p> : ""}
+        {formData.length > 0 ? (
+          <p>
+            Total Of Amount: <span>{totalAmount}</span> RS <br />{" "}
+            {formData.length > 1
+              ? `${props.typeForm} Source: ${formData.length}`
+              : ``}{" "}
+          </p>
+        ) : (
+          ""
+        )}
       </div>
       <div className="list-income">
-        {formArray.length > 0 ? (
-          formArray.map((attribute) => {
+        {formData.length > 0 ? (
+          formData.map((attribute) => {
             return (
-              <ul key={attribute.Id}>
-                <li key={attribute.Id}>
-                  {attribute.Source.charAt(0).toUpperCase() + attribute.Source.slice(1)}: {attribute.Amount} RS On
+              <ul key={attribute.id}>
+                <li key={attribute.id}>
+                  {attribute.Source.charAt(0).toUpperCase() +
+                    attribute.Source.slice(1)}
+                  : {attribute.Amount} RS On
                   {format(new Date(attribute.Date), " eee - d MMM yyyy")}
-                  <button onClick={() => handleDelete(attribute.Id)}>
+                  <button onClick={() => handleDelete(attribute.id)}>
                     <FontAwesomeIcon icon={faTrash} />
                   </button>
                   <button>
