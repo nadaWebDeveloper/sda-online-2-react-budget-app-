@@ -1,15 +1,18 @@
-import { useState } from "react"
-
+import { useContext, useState } from "react"
 import { useForm, SubmitHandler } from "react-hook-form";
+
 import TitlePage from "./TitlePage";
+import { BudgetContext } from "../../context/BudgetContext";
+
 
 type Input = {
   target: number;
 }
 
 
-function SavingTarget(props: {totalSaving:number}) {
-  const {totalSaving} = props;
+const SavingTarget = () => {
+
+  const {totalSaving} = useContext(BudgetContext);
   const {
     register,
     handleSubmit,
@@ -23,12 +26,11 @@ function SavingTarget(props: {totalSaving:number}) {
     setTarget(data.target);
   }
 
-  const progress = (totalSaving/target || 0)* 100;
+  const progress = (totalSaving /target || 0)* 100;
   return (
     <>
     <div>
     <TitlePage titlePage='Saving-target' />
-
         <form action="" onSubmit={handleSubmit(handleSubmitTarget)}>
             <div>
                 <label htmlFor="target">Target: </label>

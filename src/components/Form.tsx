@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
 import { v4 as uuidv4 } from "uuid";
@@ -9,7 +9,9 @@ import { faTrash, faEdit } from "@fortawesome/free-solid-svg-icons";
 
 import { toast } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+
 import TitlePage from "./TitlePage";
+import { BudgetContext } from "../../context/BudgetContext";
 
 
 type Inputs = {
@@ -18,13 +20,14 @@ type Inputs = {
   Amount: number;
   Date: string;
 };
-type formProps = {
-  totalIncomeUpdated: (finalIncome: number) => void;
-  totalExpensesUpdated: (finalExpense: number) => void;
+type FormProps = {
   typeForm: string;
 };
 
-function Form(props: formProps) {
+const  Form = (props: FormProps) => {
+
+  const {setTotalIncome, setTotalExpenses} = useContext(BudgetContext);
+
   const {
     register,
     handleSubmit,
@@ -58,9 +61,9 @@ function Form(props: formProps) {
 
   useEffect(() => {
     if (props.typeForm === `Incomes`) {
-      props.totalIncomeUpdated(totalAmount);
+      setTotalIncome(totalAmount);
     } else {
-      props.totalExpensesUpdated(totalAmount);
+      setTotalExpenses(totalAmount);
     }
   }, [totalAmount, formData, props]);
 

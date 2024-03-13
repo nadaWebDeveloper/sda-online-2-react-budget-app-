@@ -1,24 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
+
 import TitlePage from "./TitlePage";
+import { BudgetContext } from "../../context/BudgetContext";
 
-
-type savingProps = {
+type SavingProps = {
   totalIncome: number;
   totalExpenses: number;
-  getTotalSavingUpdated: (finalSaving: number) => void;
+  setTotalSaving: number;
 };
 
 type Input = {
   savingAmount: number;
 };
 
-function SavingAmount(props: savingProps) {
-  const { totalIncome, totalExpenses, getTotalSavingUpdated } =
-    props;
+const SavingAmount = () => {
+  const { totalIncome, totalExpenses, setTotalSaving } =
+    useContext(BudgetContext);
+
   const {
     register,
     handleSubmit,
@@ -28,25 +29,24 @@ function SavingAmount(props: savingProps) {
   const [transfer, setTransfer] = useState(0);
 
   const balance = useMemo(() => {
-    return Math.abs(totalExpenses - totalIncome) ;
+    return Math.abs(totalExpenses - totalIncome);
   }, [totalExpenses, totalIncome]);
 
   const handleSubmitTransfer: SubmitHandler<Input> = (data) => {
     const amountTransfer = data.savingAmount;
     setTransfer(amountTransfer);
-    setValue('savingAmount',0);
+    setValue("savingAmount", 0);
     toast.success(`Transfer To Target`);
-
   };
 
   useEffect(() => {
-    getTotalSavingUpdated(transfer);
-  }, [transfer, props]);
+    setTotalSaving(transfer);
+  }, [transfer]);
 
   return (
     <>
       <div>
-      <TitlePage titlePage='Saving-amount' />
+        <TitlePage titlePage="Saving-amount" />
         <div>
           <h3>Current Balance: {balance}</h3>
         </div>
@@ -59,7 +59,10 @@ function SavingAmount(props: savingProps) {
               {...register("savingAmount", {
                 required: " * Saving Amount Is Required ",
                 min: { value: 1, message: " * The Minimum Amount Must Be 1 " },
-                max: {value: balance,message:` * The Maximum Amount Must Be Less Than ${balance}` },
+                max: {
+                  value: balance,
+                  message: ` * The Maximum Amount Must Be Less Than ${balance}`,
+                },
               })}
             />
             {errors.savingAmount && <span>{errors.savingAmount.message}</span>}
@@ -69,6 +72,6 @@ function SavingAmount(props: savingProps) {
       </div>
     </>
   );
-}
+};
 
 export default SavingAmount;

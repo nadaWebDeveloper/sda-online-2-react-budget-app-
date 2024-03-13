@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import Budget from "./Budget";
+import Budget from "./components/Budget";
 
 function App() {
   return (
